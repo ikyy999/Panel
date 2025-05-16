@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Data Transfer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #f9fafb;
+            --card: #ffffff;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            background: var(--card);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+        }
+
+        .logo i {
+            font-size: 36px;
+            color: var(--primary);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            margin-bottom: 32px;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .progress-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: var(--primary);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .progress-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .progress-label {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-percent {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-left: 12px;
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background: #f3f4f6;
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 100px;
+            width: 0;
+            transition: width 0.4s ease, background 0.3s ease;
+            position: relative;
+        }
+
+        .progress-bar.active {
+            animation: pulse 1.5s infinite;
+        }
+
+        .progress-item:nth-child(1) .progress-bar {
+            background: linear-gradient(90deg, var(--primary), #4ade80);
+        }
+
+        .progress-item:nth-child(2) .progress-bar {
+            background: linear-gradient(90deg, var(--primary), #f43f5e);
+        }
+
+        .progress-item:nth-child(3) .progress-bar {
+            background: linear-gradient(90deg, var(--primary), #f59e0b);
+        }
+
+        .progress-item:nth-child(4) .progress-bar {
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
+            background-size: 200% 100%;
+            animation: gradientFlow 3s infinite linear;
+        }
+
+        .checkmark {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--success);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-size: 20px;
+        }
+
+        /* Verification Section */
+        .verification-section {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .verification-icon {
+            font-size: 80px;
+            color: var(--success);
+            margin: 20px 0;
+            animation: bounceIn 0.6s ease, pulse 2s infinite;
+        }
+
+        .verification-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .verification-message {
+            color: var(--text-light);
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+
+        .data-icons {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 32px 0;
+        }
+
+        .data-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .data-icon-box {
+            width: 64px;
+            height: 64px;
+            background: var(--primary-light);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .data-icon-label {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        /* Home Section */
+        .home-section {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn i {
+            font-size: 16px;
+        }
+
+        /* File Request Section */
+        .file-request-section {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: border 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            appearance: none;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            margin-top: 8px;
+            background: var(--primary);
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+        }
+
+        /* File Progress Section */
+        .file-progress-section {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .file-progress-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .file-progress-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .file-progress-text {
+            color: var(--text-light);
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .file-progress-bar-container {
+            height: 10px;
+            background: #f3f4f6;
+            border-radius: 100px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .file-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #7c3aed);
+            border-radius: 100px;
+            width: 0;
+            transition: width 0.1s linear;
+        }
+
+        .file-progress-percent {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            padding: 24px;
+            text-align: center;
+            animation: modalSlideUp 0.4s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-message {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes modalSlideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1>Secure Data Transfer</h1>
+                <p class="subtitle">Encrypting and transferring your data securely</p>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="progress-content">
+                    <div class="progress-header">
+                        <div class="progress-label">Memindahkan data pengguna</div>
+                        <div class="progress-percent">0%</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress1"></div>
+                    </div>
+                </div>
+                <div class="checkmark">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="progress-content">
+                    <div class="progress-header">
+                        <div class="progress-label">Mengambil akses perangkat</div>
+                        <div class="progress-percent">0%</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress2"></div>
+                    </div>
+                </div>
+                <div class="checkmark">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="progress-content">
+                    <div class="progress-header">
+                        <div class="progress-label">Mendapatkan lokasi</div>
+                        <div class="progress-percent">0%</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress3"></div>
+                    </div>
+                </div>
+                <div class="checkmark">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="progress-content">
+                    <div class="progress-header">
+                        <div class="progress-label">Enkripsi & verifikasi data</div>
+                        <div class="progress-percent">0%</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress4"></div>
+                    </div>
+                </div>
+                <div class="checkmark">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Section -->
+        <div class="verification-section" id="verificationSection">
+            <div class="verification-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="verification-title">VERIFIKASI BERHASIL</h2>
+            <p class="verification-message">Data telah berhasil dipindahkan ke sistem admin</p>
+
+            <div class="data-icons">
+                <div class="data-icon" style="animation-delay: 0.1s">
+                    <div class="data-icon-box">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <div class="data-icon-label">Gallery</div>
+                </div>
+                <div class="data-icon" style="animation-delay: 0.3s">
+                    <div class="data-icon-box">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+<div class="data-icon-label">Documents</div>
+                </div>
+                <div class="data-icon" style="animation-delay: 0.5s">
+                    <div class="data-icon-box">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="data-icon-label">Messages</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Section -->
+        <div class="home-section" id="homeSection">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h1>Admin Control Panel</h1>
+                <p class="subtitle">Select an option below to continue</p>
+            </div>
+
+            <div class="button-grid">
+                <button class="btn" id="contactAdminBtn">
+                    <i class="fas fa-headset"></i> Contact Admin
+                </button>
+                <button class="btn" id="checkDataBtn">
+                    <i class="fas fa-database"></i> Check Data
+                </button>
+                <button class="btn" id="createFileBtn">
+                    <i class="fas fa-file-export"></i> Create File
+                </button>
+                <button class="btn" id="victimBtn">
+                    <i class="fas fa-user-slash"></i> Victim
+                </button>
+            </div>
+        </div>
+
+        <!-- File Request Section -->
+        <div class="file-request-section" id="fileRequestSection">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-file-import"></i>
+                </div>
+                <h1>Create New File</h1>
+                <p class="subtitle">Enter file details to begin processing</p>
+            </div>
+
+            <div class="form-group">
+                <label for="fileName" class="form-label">File Name</label>
+                <input type="text" id="fileName" class="form-input" placeholder="Enter file name">
+            </div>
+
+            <div class="form-group">
+                <label for="fileFormat" class="form-label">File Format</label>
+                <div class="select-wrapper">
+                    <select id="fileFormat" class="form-select">
+                        <option value="">Select format</option>
+                        <option value="zip">ZIP Archive</option>
+                        <option value="jpg">JPG Image</option>
+                        <option value="pdf">PDF Document</option>
+                        <option value="exe">EXE Executable</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-submit" id="submitFileRequest">
+                <i class="fas fa-arrow-right"></i> Continue
+            </button>
+        </div>
+
+        <!-- File Progress Section -->
+        <div class="file-progress-section" id="fileProgressSection">
+            <div class="file-progress-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+            <h3 class="file-progress-title" id="fileProgressTitle">Creating File</h3>
+            <p class="file-progress-text" id="fileProgressDetails">Preparing to create file...</p>
+            
+            <div class="file-progress-bar-container">
+                <div class="file-progress-bar" id="fileProgressBar"></div>
+            </div>
+            <div class="file-progress-percent" id="fileProgressPercent">0%</div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="contactAdminModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h3 class="modal-title">Admin Contact</h3>
+            <p class="modal-message">Contact central admin: @voxas70 [Iraq] for assistance</p>
+            <button class="modal-btn" id="closeContactModal">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="checkDataModal">
+        <div class="modal-content">
+            <div class="modal-icon" style="color: var(--success);">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="modal-title">Data Successfully Cloned</h3>
+            <p class="modal-message">All data including address, location, Gmail, SMS, and camera access has been cloned and added to admin system.</p>
+            <button class="modal-btn" id="closeCheckDataModal">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="victimModal">
+        <div class="modal-content">
+            <div class="modal-icon" style="color: var(--warning);">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title">No Connected Devices</h3>
+            <p class="modal-message">No victim devices are currently connected. Please check via APK/Web Panel KyyXRat.</p>
+            <button class="modal-btn" id="closeVictimModal">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="fileErrorModal">
+        <div class="modal-content">
+            <div class="modal-icon" style="color: var(--error);">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <h3 class="modal-title">Process Failed</h3>
+            <p class="modal-message">File creation failed. Please try again or check your internet connection.</p>
+            <button class="modal-btn" id="closeFileErrorModal">Close</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const progressSection = document.getElementById('progressSection');
+            const verificationSection = document.getElementById('verificationSection');
+            const homeSection = document.getElementById('homeSection');
+            const fileRequestSection = document.getElementById('fileRequestSection');
+            const fileProgressSection = document.getElementById('fileProgressSection');
+            
+            // Modal elements
+            const contactAdminModal = document.getElementById('contactAdminModal');
+            const checkDataModal = document.getElementById('checkDataModal');
+            const victimModal = document.getElementById('victimModal');
+            const fileErrorModal = document.getElementById('fileErrorModal');
+            
+            // Progress bars
+            const progressBars = [
+                document.getElementById('progress1'),
+                document.getElementById('progress2'),
+                document.getElementById('progress3'),
+                document.getElementById('progress4')
+            ];
+            
+            // File creation elements
+            const fileNameInput = document.getElementById('fileName');
+            const fileFormatSelect = document.getElementById('fileFormat');
+            const fileProgressBar = document.getElementById('fileProgressBar');
+            const fileProgressTitle = document.getElementById('fileProgressTitle');
+            const fileProgressDetails = document.getElementById('fileProgressDetails');
+            const fileProgressPercent = document.getElementById('fileProgressPercent');
+
+            // Animate main progress bars
+            function animateProgressBars() {
+                progressBars.forEach((bar, index) => {
+                    let width = 0;
+                    const percentElement = bar.closest('.progress-item').querySelector('.progress-percent');
+                    const checkmark = bar.closest('.progress-item').querySelector('.checkmark');
+                    
+                    // Different speeds for each bar
+                    const speed = [30, 40, 50, 60][index];
+                    
+                    const interval = setInterval(() => {
+                        width++;
+                        bar.style.width = width + '%';
+                        percentElement.textContent = width + '%';
+                        
+                        if (width >= 100) {
+                            clearInterval(interval);
+                            percentElement.style.display = 'none';
+                            checkmark.style.opacity = '1';
+                            
+                            // When last bar completes
+                            if (index === 3) {
+                                setTimeout(() => {
+                                    progressSection.style.display = 'none';
+                                    verificationSection.style.display = 'block';
+                                    
+                                    setTimeout(() => {
+                                        verificationSection.style.display = 'none';
+                                        homeSection.style.display = 'block';
+                                    }, 3000);
+                                }, 500);
+                            }
+                        }
+                    }, speed);
+                });
+            }
+
+            // Start progress bars after slight delay
+            setTimeout(animateProgressBars, 500);
+
+            // Button event listeners
+            document.getElementById('contactAdminBtn').addEventListener('click', () => {
+                contactAdminModal.style.display = 'flex';
+            });
+
+            document.getElementById('checkDataBtn').addEventListener('click', () => {
+                checkDataModal.style.display = 'flex';
+            });
+
+            document.getElementById('victimBtn').addEventListener('click', () => {
+                victimModal.style.display = 'flex';
+            });
+
+            document.getElementById('createFileBtn').addEventListener('click', () => {
+                homeSection.style.display = 'none';
+                fileRequestSection.style.display = 'block';
+            });
+
+            // File request submission
+            document.getElementById('submitFileRequest').addEventListener('click', () => {
+                const fileName = fileNameInput.value.trim();
+                const fileFormat = fileFormatSelect.value;
+                
+                if (!fileName || !fileFormat) {
+                    alert('Please enter both file name and select format');
+                    return;
+                }
+                
+                fileRequestSection.style.display = 'none';
+                fileProgressSection.style.display = 'block';
+                
+                // Update progress details
+                fileProgressTitle.textContent = `Creating ${fileName}.${fileFormat}`;
+                fileProgressDetails.textContent = `Initializing ${fileFormat.toUpperCase()} file creation...`;
+                
+                // Start file creation progress
+                simulateFileCreation(fileName, fileFormat);
+            });
+
+            // Simulate 10 minute file creation
+            function simulateFileCreation(fileName, fileFormat) {
+                let progress = 0;
+                const totalSteps = 100;
+                const intervalTime = 6000; // 6000ms * 100 = 10 minutes
+                
+                const interval = setInterval(() => {
+                    progress++;
+                    fileProgressBar.style.width = progress + '%';
+                    fileProgressPercent.textContent = progress + '%';
+                    
+                    // Update status messages at different stages
+                    if (progress < 20) {
+                        fileProgressDetails.textContent = `Preparing ${fileFormat.toUpperCase()} structure...`;
+                    } else if (progress < 50) {
+                        fileProgressDetails.textContent = `Compressing data for ${fileName}.${fileFormat}...`;
+                    } else if (progress < 80) {
+                        fileProgressDetails.textContent = `Applying encryption to ${fileFormat.toUpperCase()} file...`;
+                    } else {
+                        fileProgressDetails.textContent = `Finalizing ${fileName}.${fileFormat} creation...`;
+                    }
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            fileProgressSection.style.display = 'none';
+                            fileErrorModal.style.display = 'flex';
+                            
+                            // After error, return to home
+                            document.getElementById('closeFileErrorModal').addEventListener('click', () => {
+                                fileErrorModal.style.display = 'none';
+                                fileRequestSection.style.display = 'none';
+                                homeSection.style.display = 'block';
+                                
+                                // Reset form
+                                fileNameInput.value = '';
+                                fileFormatSelect.value = '';
+                            });
+                        }, 1000);
+                    }
+                }, intervalTime);
+            }
+
+            // Close modal buttons
+            document.getElementById('closeContactModal').addEventListener('click', () => {
+                contactAdminModal.style.display = 'none';
+            });
+
+            document.getElementById('closeCheckDataModal').addEventListener('click', () => {
+                checkDataModal.style.display = 'none';
+            });
+
+            document.getElementById('closeVictimModal').addEventListener('click', () => {
+                victimModal.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
